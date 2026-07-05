@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -19,7 +19,6 @@ import {
   useSubmitAttempt,
   useStartSession,
   useEndSession,
-  Mission,
 } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
@@ -46,8 +45,13 @@ export function FocusMode() {
   const [revealed, setRevealed] = useState(false);
   const [showNote, setShowNote] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(() => {
+    try { return localStorage.getItem("bankos_focus_note") ?? ""; } catch { return ""; }
+  });
   const [seconds, setSeconds] = useState(0);
+  const [flagged, setFlagged] = useState(false);
+  const finishedRef = useRef(false);
+  const questionStartTime = useRef(Date.now());
   const [correct, setCorrect] = useState(0);
   const [attempted, setAttempted] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -67,11 +71,14 @@ export function FocusMode() {
   }, [focusMode]);
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const t = setInterval(() => {
+      if (!finishedRef.current) setSeconds((s) => s + 1);
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 
   function finish() {
+    finishedRef.current = true;
     if (sessionId) {
       endSessionMut.mutate({
         sessionId,
@@ -88,11 +95,12 @@ export function FocusMode() {
     setSelected(i);
     setRevealed(true);
     setAttempted((a) => a + 1);
+    const perQuestionTime = Math.round((Date.now() - questionStartTime.current) / 1000);
     const res = await submitAttempt.mutateAsync({
       questionId: q.id,
       selected: i,
       context: "focus",
-      timeTakenSec: seconds,
+      timeTakenSec: perQuestionTime,
     });
     setResult(res);
     if (res.correct) setCorrect((c) => c + 1);
@@ -103,7 +111,9 @@ export function FocusMode() {
     setRevealed(false);
     setResult(null);
     setShowHint(false);
+    setFlagged(false);
     setIdx((i) => i + 1);
+    questionStartTime.current = Date.now();
     if (attempted + 1 >= total) {
       // session done
       setTimeout(finish, 400);
@@ -304,8 +314,16 @@ export function FocusMode() {
             >
               <NotebookPen className="h-4 w-4" /> Notebook
             </button>
-            <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/10">
-              <Flag className="h-4 w-4" /> Flag
+            <button
+              onClick={() => setFlagged((v) => !v)}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
+                flagged
+                  ? "border-amber-400/40 bg-amber-500/20 text-amber-200"
+                  : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+              )}
+            >
+              <Flag className={cn("h-4 w-4", flagged && "fill-amber-300 text-amber-300")} /> Flag
             </button>
           </div>
 
@@ -338,7 +356,10 @@ export function FocusMode() {
               </div>
               <textarea
                 value={note}
-                onChange={(e) => setNote(e.target.value)}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  try { localStorage.setItem("bankos_focus_note", e.target.value); } catch {}
+                }}
                 placeholder="Jot down a concept, shortcut or doubt…"
                 className="mt-4 h-48 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white placeholder:text-white/30 focus:border-violet-400/40 focus:outline-none"
               />

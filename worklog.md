@@ -95,3 +95,143 @@ Stage Summary:
 - Database migrated from PostgreSQL to SQLite
 - 15 files modified, 0 new files created
 - Lint passes, TypeScript compiles
+
+---
+Task ID: 2
+Agent: Main (Round 2 - QA, Bug Fixes, Styling, Features)
+Task: Comprehensive codebase audit, bug fixes, styling improvements, and new features
+
+Work Log:
+- Full codebase audit of 32 files (all views, API routes, lib, CSS, shared components)
+- Identified and cataloged 20+ issues across severity levels
+- Applied all critical bug fixes
+- Applied all styling improvements
+- Added 4 new features
+- Final lint passes clean
+- Server compiles successfully (200 on all routes)
+
+## Critical Bugs Fixed:
+
+### Profile.tsx - XP Progress Bar Calculation
+- **Problem**: `xpToNext = profile.level * 1000` was wrong; `awardXp` uses flat 1000 XP per level
+- **Fix**: Changed to `const xpToNext = 1000`
+
+### readiness/route.ts - Prisma Date Serialization
+- **Problem**: Raw Prisma profile with Date objects returned directly, potential serialization failure
+- **Fix**: Explicitly serialize all Date fields (targetDate, createdAt, updatedAt, lastActiveDate) to ISO strings
+
+### metrics.ts - Wasted groupBy Query
+- **Problem**: `computeSubjectMastery` had a `db.attempt.groupBy` query whose result (`rows`) was never used
+- **Fix**: Removed the unused groupBy query entirely
+
+### db.ts - Query Logging in Production
+- **Problem**: `log: ['query']` logged every Prisma query in all environments
+- **Fix**: Gated to development only: `process.env.NODE_ENV === 'development' ? ['query'] : []`
+
+## CSS Fixes:
+
+### globals.css - Electric Color Variants
+- **Problem**: `.bg-electric-500/15` had wrong opacity (0.1 instead of 0.15); `.bg-electric-600` also 0.1 instead of 1.0
+- **Fix**: Split into separate selectors with correct opacities
+
+### globals.css - Electric Text Shade Variation
+- **Problem**: All electric text shades (300/400/500/600) mapped to same color #06b6d4
+- **Fix**: Added proper shade progression: rgb(103 232 249), rgb(34 211 238), rgb(6 182 212), rgb(8 145 178)
+
+## Non-functional UI Fixes:
+
+### SettingsView.tsx - All Switches Now Functional
+- **Problem**: Reduce motion, 2FA switches had no state/handlers; theme/accent selectors were decorative
+- **Fix**: Added `useSetting` hook with localStorage persistence; connected all switches with checked/onCheckedChange; theme buttons and accent circles now track selection
+
+### FocusMode.tsx - Timer, Flag, Notes, Time Tracking
+- **Problem**: Timer never stopped after finish; Flag button did nothing; notes lost on unmount; timeTakenSec was cumulative
+- **Fix**: Added `finishedRef` to stop timer; added `flagged` state for Flag button; notes persist to localStorage; per-question time tracking via `questionStartTime` ref
+
+### Onboarding.tsx - Step Count
+- **Problem**: "Step X of 4" but 5 steps existed
+- **Fix**: Changed to "Step X of 5"
+
+### Analytics.tsx - Labels and Performance
+- **Problem**: KpiCard trend always "real"; day labels were "D1"–"D14"; attempts fetched twice
+- **Fix**: Meaningful trend labels per card; day names (Mon, Tue...); merged duplicate DB queries into one
+
+## Unused Imports Removed:
+- Coach.tsx: `Zap`
+- Analytics.tsx: `ArrowUpRight`
+- SkillTree.tsx: `Lock`
+- SettingsView.tsx: `Moon`
+- FocusMode.tsx: `Mission`
+
+## Styling Improvements:
+
+### Coach.tsx
+- Added typing indicator with skeleton + animated dots
+- Added gradient glow on chat input focus
+- Enhanced quick-reply chip hover (scale, glow, border)
+
+### Analytics.tsx
+- Added text-shadow glow on KPI numbers
+- Added gradient separator between sections
+- Enhanced empty state with icon and description
+- Pill-shaped section time bars with gradients
+- Pulsing dot on Study Hours chart
+
+### Notebook.tsx
+- Count badges on filter tabs
+- Check animation on reviewed toggle (spring scale)
+- Alternating row backgrounds
+- Left border color by subject
+
+### Revision.tsx
+- Gradient strength bars (red→yellow→green)
+- "Due today" badges
+- Pulsing Review button for overdue items
+- Progress summary bar at top
+
+### Syllabus.tsx
+- Completion percentage badges per subject
+- Checkbox bounce animation on toggle
+- Search text highlighting
+
+## New Features:
+
+### Daily Goal Tracker (MissionControl)
+- Circular progress ring showing questions answered today vs 50-question goal
+- Motivational messages at 0/25/50/75/100% thresholds
+- Uses existing Ring component and GlassCard
+
+### Mobile Quick Stats Bar (AppShell)
+- Compact stats row visible on mobile (lg:hidden) below top bar
+- Shows Streak, Coins, and Level with matching icons/colors
+
+### Keyboard Shortcuts Help (CommandPalette)
+- Footer section showing ⌘K, ⌘1-5, ? shortcuts
+- Non-intrusive with subtle styling
+
+### Streak Insights (Profile)
+- Current streak, longest streak (from heatmap), total active days
+- Helper functions computeLongestStreak() and computeActiveDays()
+
+Stage Summary:
+- 20+ issues identified and fixed across 18 files
+- 4 new features added
+- Lint passes clean (0 errors)
+- Server compiles successfully (200 on /, /api/auth/me, /api/questions, /api/current-affairs)
+- No new packages installed
+- No UI redesigns — all changes are fixes, polish, and additions
+- All changes preserve existing AI provider (Google Gemini)
+
+## Unresolved Issues / Risks:
+1. **Dev server memory instability**: The Next.js dev server (Turbopack) intermittently dies in this environment due to memory constraints (~4GB RAM). This is an environment limitation, not a code bug. The server compiles and serves correctly when running.
+2. **Agent-browser cannot access the app**: The Caddy gateway on port 81 serves a Z logo fallback page instead of proxying to the Next.js app. Direct port 3000 access works via curl but agent-browser cannot reach it (different network namespace). The user's preview panel should work correctly.
+3. **GEMINI_API_KEY**: The .env file only has DATABASE_URL. For AI features (question generation, current affairs refresh, AI coach), a GEMINI_API_KEY needs to be added to .env. The code handles missing key gracefully (returns empty results / seed data).
+4. **Priority recommendations for next phase**:
+   - Add GEMINI_API_KEY to .env to enable AI features
+   - Add more seed questions (currently 33) for better UX before AI generates more
+   - Consider adding error boundary components for graceful crash handling
+   - Add loading skeletons for all views that fetch data
+   - Implement the "Take quiz" button on Current Affairs featured card
+   - Add data export/import validation
+   - Consider adding a "Study Timer" standalone feature
+   - Add dark/light theme toggle functionality (currently only dark)

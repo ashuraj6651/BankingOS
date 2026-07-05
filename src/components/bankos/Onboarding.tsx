@@ -30,8 +30,6 @@ export function Onboarding() {
   const [hours, setHours] = useState(4);
   const [weak, setWeak] = useState<string[]>([]);
 
-  const defaultDate = defaultTargetDate();
-
   const steps = ["Identity", "Exam", "Schedule", "Weaknesses", "Launch"];
 
   function next() {
@@ -55,7 +53,7 @@ export function Onboarding() {
       await onboard.mutateAsync({
         name: name.trim(),
         exam,
-        targetDate: targetDate || defaultDate,
+        targetDate: targetDate || defaultTargetDate(),
         studyHoursPerDay: hours,
         weakSubjects: weak,
       });
@@ -107,7 +105,7 @@ export function Onboarding() {
           <AnimatePresence mode="wait">
             {step === 0 && (
               <Step key="s0">
-                <Eyebrow><Sparkles className="h-3 w-3" /> Step 1 of 4</Eyebrow>
+                <Eyebrow><Sparkles className="h-3 w-3" /> Step 1 of 5</Eyebrow>
                 <h2 className="mt-4 text-2xl font-bold text-white">What should we call you?</h2>
                 <p className="mt-1.5 text-sm text-white/50">Your Mentor will greet you by name every day.</p>
                 <input
@@ -123,7 +121,7 @@ export function Onboarding() {
 
             {step === 1 && (
               <Step key="s1">
-                <Eyebrow><Target className="h-3 w-3" /> Step 2 of 4</Eyebrow>
+                <Eyebrow><Target className="h-3 w-3" /> Step 2 of 5</Eyebrow>
                 <h2 className="mt-4 text-2xl font-bold text-white">Which exam are you writing?</h2>
                 <p className="mt-1.5 text-sm text-white/50">We'll tailor every question, mock and roadmap to it.</p>
                 <div className="mt-6 grid grid-cols-2 gap-2.5">
@@ -147,7 +145,7 @@ export function Onboarding() {
 
             {step === 2 && (
               <Step key="s2">
-                <Eyebrow><Calendar className="h-3 w-3" /> Step 3 of 4</Eyebrow>
+                <Eyebrow><Calendar className="h-3 w-3" /> Step 3 of 5</Eyebrow>
                 <h2 className="mt-4 text-2xl font-bold text-white">When is your exam?</h2>
                 <p className="mt-1.5 text-sm text-white/50">The countdown starts the moment you launch.</p>
                 <div className="mt-6 space-y-5">
@@ -157,7 +155,7 @@ export function Onboarding() {
                     </label>
                     <input
                       type="date"
-                      value={targetDate || defaultDate}
+                      value={targetDate || defaultTargetDate()}
                       onChange={(e) => setTargetDate(e.target.value)}
                       className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-lg text-white focus:border-violet-400/40 focus:outline-none [color-scheme:dark]"
                     />
@@ -189,7 +187,7 @@ export function Onboarding() {
 
             {step === 3 && (
               <Step key="s3">
-                <Eyebrow><Sparkles className="h-3 w-3" /> Step 4 of 4</Eyebrow>
+                <Eyebrow><Sparkles className="h-3 w-3" /> Step 4 of 5</Eyebrow>
                 <h2 className="mt-4 text-2xl font-bold text-white">Any weak subjects?</h2>
                 <p className="mt-1.5 text-sm text-white/50">Your AI Mentor will weight these heavier in your daily plan. Pick all that apply.</p>
                 <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -228,7 +226,7 @@ export function Onboarding() {
                 <div className="mt-6 space-y-2.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
                   <Row label="Name" value={name} />
                   <Row label="Exam" value={exam} />
-                  <Row label="Target" value={targetDate || defaultDate} />
+                  <Row label="Target" value={targetDate || defaultTargetDate()} />
                   <Row label="Daily hours" value={`${hours}h`} />
                   <Row label="Weak spots" value={weak.length ? weak.join(", ") : "—"} />
                 </div>

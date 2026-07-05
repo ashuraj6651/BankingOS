@@ -41,12 +41,6 @@ export async function getProfile() {
  */
 export async function computeSubjectMastery(profileId: string): Promise<SubjectMastery[]> {
   const subjects = ["Reasoning", "English", "Quant", "Banking", "Current Affairs"];
-  const rows = await db.attempt.groupBy({
-    by: ["questionId"],
-    where: { profileId },
-    _count: { _all: true },
-  });
-  // We need subject-level; fetch questions
   const attempts = await db.attempt.findMany({
     where: { profileId },
     include: { question: { select: { subject: true } } },

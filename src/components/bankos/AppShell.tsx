@@ -184,6 +184,23 @@ export function AppShell() {
         </button>
       </header>
 
+      {/* ===== Mobile quick stats bar ===== */}
+      <div className="sticky top-14 z-30 flex items-center justify-center gap-6 border-b border-white/[0.06] bg-[#070b16]/80 px-4 py-2 backdrop-blur-2xl lg:hidden">
+        <div className="flex items-center gap-1.5">
+          <Flame className="h-4 w-4 text-amber-400" />
+          <span className="text-sm font-semibold text-amber-200">{profile?.streak ?? 0}</span>
+        </div>
+        <div className="h-4 w-px bg-white/10" />
+        <div className="flex items-center gap-1.5">
+          <Coins className="h-4 w-4 text-violet-300" />
+          <span className="text-sm font-semibold text-violet-200">{(profile?.coins ?? 0).toLocaleString()}</span>
+        </div>
+        <div className="h-4 w-px bg-white/10" />
+        <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-bold text-violet-200">
+          LVL {profile?.level ?? 1}
+        </span>
+      </div>
+
       {/* ===== Mobile drawer ===== */}
       <AnimatePresence>
         {mobileOpen && (

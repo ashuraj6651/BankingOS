@@ -112,10 +112,30 @@ export function CommandPalette() {
                   })}
                 </CommandPrimitive.Group>
               </CommandPrimitive.List>
+
+              {/* Keyboard shortcuts footer */}
+              <div className="border-t border-white/[0.06] px-5 py-3">
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  <Shortcut label="Open palette" keys="⌘ K" />
+                  <Shortcut label="Quick nav" keys="⌘ 1-5" />
+                  <Shortcut label="Shortcuts" keys="?" />
+                </div>
+              </div>
             </CommandPrimitive>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+function Shortcut({ label, keys }: { label: string; keys: string }) {
+  return (
+    <div className="flex items-center gap-1.5 text-[11px] text-white/30">
+      <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-white/40">
+        {keys}
+      </kbd>
+      <span>{label}</span>
+    </div>
   );
 }

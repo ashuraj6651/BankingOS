@@ -14,6 +14,18 @@ const REASON_META: Record<string, { icon: typeof Brain; color: string; label: st
   Guess: { icon: HelpCircle, color: "#ec4899", label: "Educated Guess", rec: "Eliminate 2 options, then skip — don't gamble." },
 };
 
+const SUBJECT_BORDER_COLORS: Record<string, string> = {
+  Reasoning: "#8b5cf6",
+  Quantitative: "#22d3ee",
+  Quant: "#22d3ee",
+  English: "#3b82f6",
+  "Current Affairs": "#f59e0b",
+  GA: "#f59e0b",
+  Banking: "#ec4899",
+  "Banking Awareness": "#ec4899",
+  Computer: "#10b981",
+};
+
 const FILTERS = ["All", "Concept", "Careless", "Time", "Guess"] as const;
 
 export function Notebook() {
@@ -61,15 +73,23 @@ export function Notebook() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "border-violet-400/40 bg-violet-500/15 text-violet-200" : "border-white/10 bg-white/[0.03] text-white/55 hover:text-white"}`}
-          >
-            {f}
-          </button>
-        ))}
+        {FILTERS.map((f) => {
+          const count = f === "All" ? errors.length : (counts[f as keyof typeof counts] ?? 0);
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "border-violet-400/40 bg-violet-500/15 text-violet-200" : "border-white/10 bg-white/[0.03] text-white/55 hover:text-white"}`}
+            >
+              {f}
+              {count > 0 && (
+                <span className={`ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold ${filter === f ? "bg-violet-400/25 text-violet-200" : "bg-white/[0.08] text-white/40"}`}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {isLoading && (
@@ -97,7 +117,7 @@ export function Notebook() {
           return (
             <motion.div key={e.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <GlassCard hover={false}>
-                <div className="p-6">
+                <div className={`border-l-2 p-6 ${i % 2 === 1 ? "bg-white/[0.008]" : ""}`} style={{ borderLeftColor: SUBJECT_BORDER_COLORS[e.subject] ?? "#8b5cf6" }}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <span className="rounded-lg border px-2.5 py-1 text-[11px] font-medium text-violet-200" style={{ borderColor: `${meta.color}55`, background: `${meta.color}1a`, color: meta.color }}>
@@ -122,7 +142,14 @@ export function Notebook() {
                     onClick={() => toggle.mutate(e.id)}
                     className={`mt-4 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${e.reviewed ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white"}`}
                   >
-                    <Check className="h-3.5 w-3.5" /> {e.reviewed ? "Reviewed" : "Mark reviewed"}
+                    {e.reviewed ? (
+                      <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
+                        <Check className="h-3.5 w-3.5" />
+                      </motion.span>
+                    ) : (
+                      <Check className="h-3.5 w-3.5" />
+                    )}
+                    {" "}{e.reviewed ? "Reviewed" : "Mark reviewed"}
                   </button>
                 </div>
               </GlassCard>

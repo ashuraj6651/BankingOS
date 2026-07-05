@@ -319,7 +319,65 @@ export function MissionControl() {
           </div>
         </div>
       </GlassCard>
+
+      {/* ===== Daily Goal Tracker ===== */}
+      <DailyGoalCard attempts={s?.attempts ?? 0} />
     </div>
+  );
+}
+
+function DailyGoalCard({ attempts }: { attempts: number }) {
+  const DAILY_GOAL = 50;
+  const progress = Math.min(Math.round((attempts / DAILY_GOAL) * 100), 100);
+
+  const getMotivation = () => {
+    if (progress >= 100) return { msg: "Daily goal achieved! 🎉", color: "text-emerald-300" };
+    if (progress >= 75) return { msg: "Almost at your goal!", color: "text-violet-300" };
+    if (progress >= 50) return { msg: "Halfway there!", color: "text-cyan-300" };
+    if (progress >= 25) return { msg: "Great start, keep going!", color: "text-amber-300" };
+    return { msg: "Start your day strong!", color: "text-white/60" };
+  };
+
+  const motivation = getMotivation();
+
+  return (
+    <GlassCard hover={false} delay={0.25}>
+      <div className="flex flex-col items-center gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Ring
+            value={progress}
+            size={80}
+            stroke={8}
+            gradientFrom="#8b5cf6"
+            gradientTo="#22d3ee"
+            label={`${Math.min(attempts, DAILY_GOAL)}`}
+            sublabel="/50"
+          />
+          <div>
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-violet-300" />
+              <h3 className="text-sm font-semibold text-white">Daily Goal</h3>
+            </div>
+            <p className="mt-1 text-sm font-medium text-white/80">
+              {Math.min(attempts, DAILY_GOAL)}/{DAILY_GOAL} questions today
+            </p>
+            <p className={`mt-1 text-xs ${motivation.color}`}>
+              {motivation.msg}
+            </p>
+          </div>
+        </div>
+        <div className="hidden sm:block">
+          <div className="h-2 w-48 overflow-hidden rounded-full bg-white/[0.06]">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 via-electric-500 to-cyan-400"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+        </div>
+      </div>
+    </GlassCard>
   );
 }
 

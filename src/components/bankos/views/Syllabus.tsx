@@ -195,6 +195,7 @@ export function Syllabus() {
             isChecked={isChecked}
             onToggleTopic={(topic) => toggleTopic(s.subject, topic)}
             delay={si * 0.04}
+            query={query}
           />
         ))}
       </div>
@@ -210,6 +211,20 @@ export function Syllabus() {
   );
 }
 
+function highlightText(text: string, query: string) {
+  if (!query.trim()) return text;
+  const q = query.toLowerCase();
+  const idx = text.toLowerCase().indexOf(q);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="rounded bg-yellow-400/25 px-0.5 text-yellow-200">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 function SubjectCard({
   subject,
   open,
@@ -217,6 +232,7 @@ function SubjectCard({
   isChecked,
   onToggleTopic,
   delay,
+  query,
 }: {
   subject: SyllabusSubject;
   open: boolean;
@@ -224,6 +240,7 @@ function SubjectCard({
   isChecked: (subject: string, topic: string) => boolean;
   onToggleTopic: (topic: string) => void;
   delay: number;
+  query: string;
 }) {
   const Icon = ICONS[subject.icon] ?? Brain;
   const subjectTotal = subject.groups.reduce((a, g) => a + g.topics.length, 0);
@@ -253,6 +270,7 @@ function SubjectCard({
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-base font-semibold text-white">{subject.subject}</h3>
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: `${subject.color}18`, color: subject.color }}>{pct}%</span>
               <span className="text-xs text-white/40">· {subjectTotal} topics</span>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -311,7 +329,8 @@ function SubjectCard({
                                   : "border-white/[0.06] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]"
                               )}
                             >
-                              <span
+                              <motion.span
+                                whileTap={{ scale: 0.85 }}
                                 className={cn(
                                   "grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-all",
                                   checked
@@ -319,10 +338,14 @@ function SubjectCard({
                                     : "border-white/15 bg-white/[0.03] group-hover:border-violet-400/40"
                                 )}
                               >
-                                {checked && <Check className="h-3.5 w-3.5 text-emerald-300" />}
-                              </span>
+                                {checked && (
+                                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
+                                    <Check className="h-3.5 w-3.5 text-emerald-300" />
+                                  </motion.div>
+                                )}
+                              </motion.span>
                               <span className={cn("flex-1 leading-tight", checked ? "text-white/40 line-through" : "text-white/80")}>
-                                {topic}
+                                {highlightText(topic, query)}
                               </span>
                             </button>
                           );

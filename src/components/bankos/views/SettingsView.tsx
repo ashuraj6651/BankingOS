@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Settings, Bell, Moon, Sparkles, Download, Shield, Palette, Focus, Upload, Cloud, AlertTriangle } from "lucide-react";
+import { Settings, Bell, Sparkles, Download, Shield, Palette, Focus, Upload, Cloud, AlertTriangle } from "lucide-react";
 import { ViewHeader } from "../ViewHeader";
 import { GlassCard } from "../GlassCard";
 import { Switch } from "@/components/ui/switch";
@@ -9,16 +9,41 @@ import { useExportBackup, useImportBackup, useAuth, useLogout } from "@/lib/hook
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+function useSetting<T>(key: string, defaultValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const stored = localStorage.getItem(`bankos_setting_${key}`);
+      return stored !== null ? (JSON.parse(stored) as T) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+  const set = (v: T) => {
+    setValue(v);
+    try { localStorage.setItem(`bankos_setting_${key}`, JSON.stringify(v)); } catch {}
+  };
+  return [value, set] as const;
+}
+
 export function SettingsView() {
-  const [notif, setNotif] = useState({ briefing: true, streak: true, revision: true, weekly: false });
-  const [ai, setAi] = useState({ proactive: true, voiceBriefing: false, autoPlan: true });
-  const [focus, setFocus] = useState({ blockSites: true, ambient: true, autoFullscreen: false });
+  const [notif, setNotif] = useSetting("notif", { briefing: true, streak: true, revision: true, weekly: false });
+  const [ai, setAi] = useSetting("ai", { proactive: true, voiceBriefing: false, autoPlan: true });
+  const [focus, setFocus] = useSetting("focus", { blockSites: true, ambient: true, autoFullscreen: false });
+  const [reduceMotion, setReduceMotion] = useSetting("reduceMotion", false);
+  const [twoFactorAuth, setTwoFactorAuth] = useSetting("twoFactorAuth", false);
+  const [theme, setTheme] = useSetting("theme", "Dark");
+  const [accentColor, setAccentColor] = useSetting("accentColor", "#8b5cf6");
 
   function flip(group: "notif" | "ai" | "focus", key: string) {
     if (group === "notif") setNotif((p) => ({ ...p, [key]: !p[key as keyof typeof p] }));
     if (group === "ai") setAi((p) => ({ ...p, [key]: !p[key as keyof typeof p] }));
     if (group === "focus") setFocus((p) => ({ ...p, [key]: !p[key as keyof typeof p] }));
     toast.success("Settings updated");
+  }
+
+  function toggleBoolean(value: boolean, setter: (v: boolean) => void) {
+    const next = !value;
+    setter(next);
   }
 
   return (
@@ -37,12 +62,13 @@ export function SettingsView() {
           <div className="space-y-3 px-6 pb-6">
             <Row label="Theme" desc="Dark theme is optimised for long sessions">
               <div className="flex gap-2">
-                {["Dark", "Midnight", "Aurora"].map((t, i) => (
+                {["Dark", "Midnight", "Aurora"].map((t) => (
                   <button
                     key={t}
+                    onClick={() => { setTheme(t); toast.success("Settings updated"); }}
                     className={cn(
                       "rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
-                      i === 0
+                      t === theme
                         ? "border-violet-400/40 bg-violet-500/15 text-violet-200"
                         : "border-white/10 bg-white/[0.03] text-white/50"
                     )}
@@ -54,17 +80,18 @@ export function SettingsView() {
             </Row>
             <Row label="Accent colour" desc="Personalise your highlight spectrum">
               <div className="flex gap-2">
-                {["#8b5cf6", "#3b82f6", "#22d3ee", "#ec4899"].map((c, i) => (
-                  <span
+                {["#8b5cf6", "#3b82f6", "#22d3ee", "#ec4899"].map((c) => (
+                  <button
                     key={c}
-                    className={cn("h-6 w-6 rounded-full border-2", i === 0 ? "border-white" : "border-transparent")}
+                    onClick={() => { setAccentColor(c); toast.success("Settings updated"); }}
+                    className={cn("h-6 w-6 rounded-full border-2 transition-all", c === accentColor ? "border-white" : "border-transparent")}
                     style={{ background: c }}
                   />
                 ))}
               </div>
             </Row>
             <Row label="Reduce motion" desc="Minimise animations across the OS">
-              <Switch />
+              <Switch checked={reduceMotion} onCheckedChange={(v) => { toggleBoolean(reduceMotion, setReduceMotion); toast.success("Settings updated"); }} />
             </Row>
           </div>
         </GlassCard>
@@ -126,7 +153,7 @@ export function SettingsView() {
           <div className="space-y-3 px-6 pb-6">
             <AccountRow />
             <Row label="Two-factor auth" desc="Add an extra layer of security">
-              <Switch />
+              <Switch checked={twoFactorAuth} onCheckedChange={(v) => { toggleBoolean(twoFactorAuth, setTwoFactorAuth); toast.success("Settings updated"); }} />
             </Row>
           </div>
         </GlassCard>

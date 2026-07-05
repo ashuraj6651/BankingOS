@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Network, Lock, Check, ChevronRight, Loader2 } from "lucide-react";
+import { Network, Check, ChevronRight, Loader2 } from "lucide-react";
 import { ViewHeader } from "../ViewHeader";
 import { GlassCard } from "../GlassCard";
 import { MiniRing } from "../Ring";

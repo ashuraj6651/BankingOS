@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Send, Sunrise, Moon, TrendingUp, Target, Zap } from "lucide-react";
+import { Sparkles, Send, Sunrise, Moon, TrendingUp, Target } from "lucide-react";
 import { ViewHeader } from "../ViewHeader";
 import { GlassCard } from "../GlassCard";
 import { cn } from "@/lib/utils";
@@ -157,15 +157,19 @@ export function Coach() {
                 <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-electric-500">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-white/[0.06] bg-white/[0.03] px-4 py-4">
-                  {[0, 1, 2].map((d) => (
-                    <motion.span
-                      key={d}
-                      className="h-1.5 w-1.5 rounded-full bg-violet-400"
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ duration: 1, delay: d * 0.15, repeat: Infinity }}
-                    />
-                  ))}
+                <div className="space-y-2.5 rounded-2xl rounded-tl-sm border border-white/[0.06] bg-white/[0.03] px-4 py-3.5">
+                  <div className="h-3 w-52 animate-pulse rounded-full bg-white/[0.07]" />
+                  <div className="h-3 w-36 animate-pulse rounded-full bg-white/[0.06]" />
+                  <div className="flex items-center gap-1.5 pt-1">
+                    {[0, 1, 2].map((d) => (
+                      <motion.span
+                        key={d}
+                        className="h-1.5 w-1.5 rounded-full bg-violet-400"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ duration: 1, delay: d * 0.15, repeat: Infinity }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -177,7 +181,7 @@ export function Coach() {
               <button
                 key={q}
                 onClick={() => send(q)}
-                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/60 transition-colors hover:border-violet-400/30 hover:bg-violet-500/10 hover:text-violet-200"
+                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/60 transition-all hover:scale-[1.04] hover:border-violet-400/40 hover:bg-violet-500/10 hover:text-violet-200 hover:shadow-[0_0_16px_-2px_rgba(139,92,246,0.2)]"
               >
                 {q}
               </button>
@@ -191,7 +195,7 @@ export function Coach() {
                 e.preventDefault();
                 send(input);
               }}
-              className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 focus-within:border-violet-400/40"
+              className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 transition-all focus-within:border-violet-400/40 focus-within:shadow-[0_0_24px_-2px_rgba(139,92,246,0.25)]"
             >
               <input
                 value={input}

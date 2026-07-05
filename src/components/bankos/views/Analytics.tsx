@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { BarChart3, TrendingUp, Clock, Target, ArrowUpRight } from "lucide-react";
+import { BarChart3, TrendingUp, Clock, Target } from "lucide-react";
 import { ViewHeader } from "../ViewHeader";
 import { GlassCard } from "../GlassCard";
 import { Counter } from "../Counter";
@@ -81,16 +81,23 @@ export function Analytics() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Total Study Hours" value={totalHours} suffix="h" icon={Clock} color="#8b5cf6" trend="real" />
-        <KpiCard label="Avg Accuracy" value={accuracy} suffix="%" icon={Target} color="#22d3ee" trend="real" />
-        <KpiCard label="Questions Solved" value={totalAttempts} icon={TrendingUp} color="#3b82f6" trend="real" />
-        <KpiCard label="Mocks Taken" value={mocksTaken} icon={BarChart3} color="#ec4899" trend="real" />
+        <KpiCard label="Total Study Hours" value={totalHours} suffix="h" icon={Clock} color="#8b5cf6" trend="this week" />
+        <KpiCard label="Avg Accuracy" value={accuracy} suffix="%" icon={Target} color="#22d3ee" trend="avg" />
+        <KpiCard label="Questions Solved" value={totalAttempts} icon={TrendingUp} color="#3b82f6" trend="today" />
+        <KpiCard label="Mocks Taken" value={mocksTaken} icon={BarChart3} color="#ec4899" trend="total" />
       </div>
+
+      {/* Gradient separator */}
+      <div className="h-px bg-gradient-to-r from-transparent via-violet-400/30 to-transparent" />
 
       {totalAttempts === 0 ? (
         <GlassCard hover={false}>
-          <div className="p-10 text-center text-sm text-white/50">
-            No data yet. Answer a few questions or run a focus session to populate your analytics.
+          <div className="p-12 text-center">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-violet-500/10">
+              <BarChart3 className="h-7 w-7 text-violet-300" />
+            </div>
+            <h3 className="mt-5 text-lg font-semibold text-white">No data yet</h3>
+            <p className="mt-1.5 text-sm text-white/50">Answer questions or run a focus session to start building your analytics.</p>
           </div>
         </GlassCard>
       ) : (
@@ -98,7 +105,7 @@ export function Analytics() {
           <div className="grid gap-6 lg:grid-cols-3">
             <GlassCard className="lg:col-span-2" hover={false}>
               <div className="p-6">
-                <ChartHeader title="Study Hours & Accuracy" subtitle="Last 14 days" />
+                <ChartHeader title="Study Hours & Accuracy" subtitle="Last 14 days" pulse />
                 <div className="mt-4 h-[280px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={studyHours} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -177,13 +184,21 @@ export function Analytics() {
                   <div className="mt-4 h-[260px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={sectionTime} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                        <defs>
+                          {["#8b5cf6", "#22d3ee", "#3b82f6", "#ec4899", "#10b981"].map((c, i) => (
+                            <linearGradient key={i} id={`gbar${i}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={c} stopOpacity={1} />
+                              <stop offset="100%" stopColor={c} stopOpacity={0.35} />
+                            </linearGradient>
+                          ))}
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                         <XAxis dataKey="section" stroke="rgba(255,255,255,0.3)" fontSize={11} tickLine={false} axisLine={false} />
                         <YAxis stroke="rgba(255,255,255,0.3)" fontSize={11} tickLine={false} axisLine={false} />
                         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                        <Bar dataKey="time" radius={[6, 6, 0, 0]} name="Avg time (s)">
+                        <Bar dataKey="time" radius={[999, 999, 0, 0]} name="Avg time (s)">
                           {sectionTime.map((_, i) => (
-                            <Cell key={i} fill={["#8b5cf6", "#22d3ee", "#3b82f6", "#ec4899", "#10b981"][i % 5]} />
+                            <Cell key={i} fill={`url(#gbar${i})`} />
                           ))}
                         </Bar>
                       </BarChart>
@@ -253,7 +268,7 @@ function KpiCard({ label, value, suffix, icon: Icon, color, trend }: { label: st
           </div>
           <span className="text-[10px] uppercase tracking-wider text-white/30">{trend}</span>
         </div>
-        <div className="mt-4 text-3xl font-bold text-white">
+        <div className="mt-4 text-3xl font-bold text-white" style={{ textShadow: `0 0 24px ${color}50` }}>
           <Counter value={value} suffix={suffix} />
         </div>
         <div className="mt-1 text-xs text-white/40">{label}</div>
@@ -262,11 +277,11 @@ function KpiCard({ label, value, suffix, icon: Icon, color, trend }: { label: st
   );
 }
 
-function ChartHeader({ title, subtitle, accent }: { title: string; subtitle: string; accent?: "violet" | "emerald" | "rose" }) {
+function ChartHeader({ title, subtitle, accent, pulse }: { title: string; subtitle: string; accent?: "violet" | "emerald" | "rose"; pulse?: boolean }) {
   const dot = accent === "emerald" ? "bg-emerald-400" : accent === "rose" ? "bg-rose-400" : "bg-violet-400";
   return (
     <div className="flex items-center gap-2">
-      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${dot} ${pulse ? "animate-pulse" : ""}`} />
       <div>
         <h3 className="text-sm font-semibold text-white">{title}</h3>
         <p className="text-xs text-white/40">{subtitle}</p>

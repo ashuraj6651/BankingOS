@@ -17,7 +17,7 @@ export async function GET() {
 
   const attempts = await db.attempt.findMany({
     where: { profileId: profile.id },
-    include: { question: { select: { subject: true } } },
+    include: { question: { select: { subject: true, topic: true } } },
     orderBy: { date: "asc" },
   });
 
@@ -37,7 +37,7 @@ export async function GET() {
     d.setDate(d.getDate() - i);
     const next = new Date(d);
     next.setDate(next.getDate() + 1);
-    const dayLabel = `D${14 - i}`;
+    const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
     const daySessions = sessions.filter(
       (s) => s.startedAt >= d && s.startedAt < next
     );
@@ -86,11 +86,7 @@ export async function GET() {
 
   // topic-level mastery for strong/weak
   const topicStats: Record<string, { total: number; correct: number }> = {};
-  const allAttempts = await db.attempt.findMany({
-    where: { profileId: profile.id },
-    include: { question: { select: { topic: true } } },
-  });
-  for (const a of allAttempts) {
+  for (const a of attempts) {
     const t = a.question.topic;
     if (!topicStats[t]) topicStats[t] = { total: 0, correct: 0 };
     topicStats[t].total++;

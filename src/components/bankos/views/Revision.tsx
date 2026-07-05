@@ -32,6 +32,23 @@ export function Revision() {
         subtitle="AI schedules your revision automatically. Never forget a concept again."
       />
 
+      {items.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white/50">Review progress</span>
+            <span className="font-medium text-white">{items.filter((i) => i.strength >= 80).length} / {items.length} mastered</span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-400"
+              initial={{ width: 0 }}
+              animate={{ width: `${items.length > 0 ? (items.filter((i) => i.strength >= 80).length / items.length) * 100 : 0}%` }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <GlassCard>
           <div className="p-5">
@@ -101,7 +118,7 @@ export function Revision() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white">{r.topic}</span>
                         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/40">{r.subject}</span>
-                        {due && <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-200">DUE NOW</span>}
+                        {due && <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-200">Due today</span>}
                       </div>
                       <div className="mt-1 flex items-center gap-3 text-[11px] text-white/40">
                         <span>Due: {r.due}</span>
@@ -109,17 +126,21 @@ export function Revision() {
                         <span>· Strength: {r.strength}%</span>
                       </div>
                       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                        <div className={cn("h-full rounded-full", r.strength >= 70 ? "bg-emerald-400" : r.strength >= 40 ? "bg-amber-400" : "bg-rose-400")} style={{ width: `${r.strength}%` }} />
+                        <div className="h-full rounded-full" style={{ width: `${r.strength}%`, background: r.strength >= 70 ? 'linear-gradient(90deg, #f59e0b, #10b981)' : r.strength >= 40 ? 'linear-gradient(90deg, #f43f5e, #f59e0b)' : '#f43f5e' }} />
                       </div>
                     </div>
-                    <button
+                    <motion.button
                       onClick={() => handleReview(r.id)}
                       disabled={review.isPending}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/70 transition-colors hover:border-violet-400/40 hover:text-violet-200 disabled:opacity-50"
+                      whileTap={{ scale: 0.95 }}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/70 transition-colors hover:border-violet-400/40 hover:text-violet-200 disabled:opacity-50",
+                        due && "animate-pulse"
+                      )}
                     >
                       {r.strength >= 80 ? <Check className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       Review
-                    </button>
+                    </motion.button>
                   </motion.div>
                 );
               })}

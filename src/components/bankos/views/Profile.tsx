@@ -43,7 +43,7 @@ export function Profile() {
   const s = data.stats ?? { attempts: 0, accuracy: 0, sessions: 0, mocks: 0, daysRemaining: 0, achievements: [] as string[] };
   const r = data.readiness ?? { overall: 0, selectionProbability: 0, predictedRank: null, expectedCutoff: 0, preparationLevel: "Beginner", confidence: 0, focusScore: 0 };
   const h = data.heatmap ?? [];
-  const xpToNext = profile.level * 1000;
+  const xpToNext = 1000;
   const unlocked = new Set(s.achievements);
 
   return (
@@ -122,6 +122,30 @@ export function Profile() {
         </GlassCard>
       </div>
 
+      {/* Streak Insights */}
+      <GlassCard hover={false} delay={0.1}>
+        <div className="p-6">
+          <h3 className="text-sm font-semibold text-white">Streak Insights</h3>
+          <div className="mt-4 grid grid-cols-3 gap-4">
+            <InsightStat
+              icon={<Flame className="h-5 w-5 text-amber-400" />}
+              value={profile.streak}
+              label="Current streak"
+            />
+            <InsightStat
+              icon={<Trophy className="h-5 w-5 text-violet-300" />}
+              value={computeLongestStreak(h)}
+              label="Longest streak"
+            />
+            <InsightStat
+              icon={<Sparkles className="h-5 w-5 text-cyan-300" />}
+              value={computeActiveDays(h)}
+              label="Active days"
+            />
+          </div>
+        </div>
+      </GlassCard>
+
       {/* achievements */}
       <GlassCard hover={false}>
         <div className="p-6">
@@ -183,4 +207,32 @@ function Stat({ icon: Icon, value, label, color }: { icon: typeof Flame; value: 
       <div className="text-[11px] text-white/40">{label}</div>
     </div>
   );
+}
+
+function InsightStat({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+      {icon}
+      <div className="text-xl font-bold text-white">{value}</div>
+      <div className="text-[11px] text-white/40">{label}</div>
+    </div>
+  );
+}
+
+function computeLongestStreak(heatmap: number[]): number {
+  let longest = 0;
+  let current = 0;
+  for (let i = 0; i < heatmap.length; i++) {
+    if (heatmap[i] > 0) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      current = 0;
+    }
+  }
+  return longest;
+}
+
+function computeActiveDays(heatmap: number[]): number {
+  return heatmap.filter((v) => v > 0).length;
 }
